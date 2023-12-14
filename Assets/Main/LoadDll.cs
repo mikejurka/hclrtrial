@@ -14,6 +14,12 @@ public class LoadDll : MonoBehaviour
 
     void Start()
     {
+        Debug.Log("XXXX APIRestrictionsMainAssembly.IsMethodAllowlisted " + SpatialSys.Client.CSharpScripting.APIRestrictionsMainAssembly.IsMethodAllowlisted("c"));
+        Debug.Log("XXXX APIRestrictionsMainAssembly.IsMethodAllowlisted " + SpatialSys.Client.CSharpScripting.APIRestrictionsMainAssembly.IsMethodAllowlisted("UnityEngine.Application.Quit"));
+        Debug.Log("XXXX APIRestrictions.IsMethodAllowlisted " + SpatialSys.Client.CSharpScripting.APIRestrictions.IsMethodAllowlisted("d"));
+        Debug.Log("XXXX APIRestrictions.IsMethodAllowlisted " + SpatialSys.Client.CSharpScripting.APIRestrictions.IsMethodAllowlisted("UnityEngine.Application.Quit"));
+
+
         StartCoroutine(DownLoadAssets(this.StartGame));
     }
 

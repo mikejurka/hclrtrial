@@ -1,0 +1,3 @@
+*
+!UnityEngine.Application.Quit
+!System.Reflection*

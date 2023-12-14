@@ -1,0 +1,631 @@
+using System;
+using NUnit.Framework;
+
+namespace SpatialSys.Client.CSharpScripting.Tests
+{
+    [TestFixture]
+    public class APIAllowlistTests
+    {
+        [Test]
+        public void TestCommentsAreIgnored()
+        {
+            string allowlist = @"
+                # This is a comment
+                System.Console.WriteLine
+                !System.Console.ReadLine # This is also a comment
+
+                # Test an empty line (above me)
+            ";
+            var manager = new APIAllowlist(allowlist);
+
+            Assert.IsTrue(manager.IsMethodAllowlisted("System.Console.WriteLine"));
+            Assert.IsFalse(manager.IsMethodAllowlisted("System.Console.ReadLine"));
+        }
+
+        [Test]
+        public void TestNegatedAndNonNegatedLines()
+        {
+            string allowlist = @"
+                System.*
+                !System.Console.*
+                System.Console.WriteLine
+            ";
+            var manager = new APIAllowlist(allowlist);
+
+            Assert.IsTrue(manager.IsMethodAllowlisted("System.Console.WriteLine"));
+            Assert.IsFalse(manager.IsMethodAllowlisted("System.Console.ReadLine"));
+        }
+
+        [Test]
+        public void TestPerformance()
+        {
+            string allowlist = @"
+                System.*
+                AAAA2*
+                BBBB2*
+                CCCC2*
+                DDDD2*
+                EEEE2*
+                FFFF2*
+                GGGG2*
+                HHHH2*
+                IIII2*
+                JJJJ2*
+                KKKK2*
+                LLLL2*
+                MMMM2*
+                NNNN2*
+                OOOO2*
+                PPPP2*
+                !System.Console.*
+                BBBB*
+                CCCC*
+                DDDD*
+                EEEE*
+                FFFF*
+                GGGG*
+                HHHH*
+                IIII*
+                JJJJ*
+                KKKK*
+                LLLL*
+                MMMM*
+                NNNN*
+                OOOO*
+                PPPP*
+                QQQQ*
+                RRRR*
+System.IO.FileManager.OpenFile
+System.IO.FileManager.CloseFile
+System.IO.FileManager.DeleteFile
+System.IO.DirectoryManager.CreateDirectory
+System.IO.DirectoryManager.DeleteDirectory
+System.Net.HttpClient.SendRequest
+System.Net.HttpClient.ReceiveResponse
+System.Net.SocketManager.ConnectSocket
+System.Net.SocketManager.DisconnectSocket
+System.Threading.ThreadManager.StartThread
+System.Threading.ThreadManager.StopThread
+System.Threading.ThreadManager.PauseThread
+System.Threading.ThreadManager.ResumeThread
+System.Threading.TaskManager.ScheduleTask
+System.Threading.TaskManager.CancelTask
+System.Threading.MutexManager.CreateMutex
+System.Threading.MutexManager.ReleaseMutex
+System.Threading.SemaphoreManager.CreateSemaphore
+System.Threading.SemaphoreManager.ReleaseSemaphore
+System.Threading.EventWaitHandleManager.SetEvent
+System.Threading.EventWaitHandleManager.ResetEvent
+System.Security.Cryptography.EncryptionManager.EncryptData
+System.Security.Cryptography.EncryptionManager.DecryptData
+System.Security.Cryptography.HashManager.ComputeHash
+System.Security.Cryptography.HashManager.VerifyHash
+System.Collections.Generic.ListManager.AddItem
+System.Collections.Generic.ListManager.RemoveItem
+System.Collections.Generic.ListManager.FindItem
+System.Collections.Generic.QueueManager.EnqueueItem
+System.Collections.Generic.QueueManager.DequeueItem
+System.Collections.Generic.StackManager.PushItem
+System.Collections.Generic.StackManager.PopItem
+System.Collections.Generic.DictionaryManager.AddEntry
+System.Collections.Generic.DictionaryManager.RemoveEntry
+System.Collections.Generic.DictionaryManager.FindEntry
+System.Linq.QueryableManager.FilterData
+System.Linq.QueryableManager.SortData
+System.Linq.QueryableManager.GroupData
+System.Linq.EnumerableManager.EnumerateItems
+System.Linq.EnumerableManager.AggregateItems
+System.Linq.EnumerableManager.ConcatenateItems
+System.Xml.XmlParser.ParseDocument
+System.Xml.XmlParser.ValidateDocument
+System.Xml.XmlParser.TransformDocument
+System.Text.StringBuilderManager.AppendString
+System.Text.StringBuilderManager.InsertString
+System.Text.StringBuilderManager.RemoveString
+System.Text.RegularExpressions.RegexManager.MatchPattern
+System.Text.RegularExpressions.RegexManager.ReplacePattern
+System.Text.RegularExpressions.RegexManager.SplitPattern
+System.Drawing.GraphicsManager.DrawImage
+System.Drawing.GraphicsManager.DrawText
+System.Drawing.GraphicsManager.DrawShape
+System.Drawing.ColorManager.ConvertToRGB
+System.Drawing.ColorManager.ConvertToHex
+System.Drawing.ColorManager.BlendColors
+System.Windows.Forms.FormManager.CreateForm
+System.Windows.Forms.FormManager.CloseForm
+System.Windows.Forms.FormManager.MaximizeForm
+System.Windows.Forms.FormManager.MinimizeForm
+System.Windows.Forms.ControlManager.AddControl
+System.Windows.Forms.ControlManager.RemoveControl
+System.Windows.Forms.ControlManager.EnableControl
+System.Windows.Forms.ControlManager.DisableControl
+System.Windows.Forms.MenuManager.CreateMenu
+System.Windows.Forms.MenuManager.AddItem
+System.Windows.Forms.MenuManager.RemoveItem
+System.Windows.Forms.DialogManager.ShowDialog
+System.Windows.Forms.DialogManager.CloseDialog
+System.Windows.Forms.MessageBoxManager.ShowMessage
+System.Windows.Forms.MessageBoxManager.CloseMessage
+System.Data.SqlClient.SqlConnectionManager.OpenConnection
+System.Data.SqlClient.SqlConnectionManager.CloseConnection
+System.Data.SqlClient.SqlCommandManager.ExecuteCommand
+System.Data.SqlClient.SqlCommandManager.CancelCommand
+System.Data.SqlClient.SqlTransactionManager.BeginTransaction
+System.Data.SqlClient.SqlTransactionManager.CommitTransaction
+System.Data.SqlClient.SqlTransactionManager.RollbackTransaction
+System.Data.SqlTypes.SqlTypeConverter.ConvertToInt
+System.Data.SqlTypes.SqlTypeConverter.ConvertToString
+System.Data.SqlTypes.SqlTypeConverter.ConvertToDateTime
+System.Data.DataSetManager.CreateDataSet
+System.Data.DataSetManager.AddDataTable
+System.Data.DataSetManager.RemoveDataTable
+System.Data.DataTableManager.AddRow
+System.Data.DataTableManager.RemoveRow
+System.Data.DataTableManager.UpdateRow
+System.Data.DataRowManager.SetColumnValue
+System.Data.DataRowManager.GetColumnValue
+System.Data.DataColumnManager.AddColumn
+System.Data.DataColumnManager.RemoveColumn
+System.Data.DataRelationManager.AddRelation
+System.Data.DataRelationManager.RemoveRelation
+System.Data.DataViewManager.FilterView
+System.Data.DataViewManager.SortView
+System.Data.DataViewManager.GroupView
+System.ServiceProcess.ServiceControllerManager.StartService
+System.ServiceProcess.ServiceControllerManager.StopService
+System.ServiceProcess.ServiceControllerManager.PauseService
+System.ServiceProcess.ServiceControllerManager.ContinueService
+System.Configuration.ConfigurationManager.ReadSetting
+System.Configuration.ConfigurationManager.WriteSetting
+System.Configuration.ConfigurationManager.DeleteSetting
+System.Configuration.ConfigurationManager.LoadConfiguration
+System.Configuration.ConfigurationManager.SaveConfiguration
+System.Environment.EnvironmentManager.GetEnvironmentVariable
+System.Environment.EnvironmentManager.SetEnvironmentVariable
+System.Environment.EnvironmentManager.GetSystemInfo
+System.Globalization.CultureInfoManager.SetCulture
+System.Globalization.CultureInfoManager.GetCulture
+System.Globalization.CultureInfoManager.FormatDate
+System.Globalization.CultureInfoManager.FormatNumber
+System.Globalization.CultureInfoManager.TranslateText
+System.Diagnostics.ProcessManager.StartProcess
+System.Diagnostics.ProcessManager.StopProcess
+System.Diagnostics.ProcessManager.KillProcess
+System.Diagnostics.ProcessManager.GetProcessInfo
+System.Diagnostics.DebugManager.WriteLog
+System.Diagnostics.DebugManager.LogError
+System.Diagnostics.DebugManager.LogWarning
+System.Diagnostics.DebugManager.WriteTrace
+System.Diagnostics.TraceManager.StartTrace
+System.Diagnostics.TraceManager.StopTrace
+System.Diagnostics.TraceManager.TraceEvent
+System.Diagnostics.TraceManager.TraceData
+System.Runtime.Serialization.Formatter
+
+System3.IO.FileManager.OpenFile
+System3.IO.FileManager.CloseFile
+System3.IO.FileManager.DeleteFile
+System3.IO.DirectoryManager.CreateDirectory
+System3.IO.DirectoryManager.DeleteDirectory
+System3.Net.HttpClient.SendRequest
+System3.Net.HttpClient.ReceiveResponse
+System3.Net.SocketManager.ConnectSocket
+System3.Net.SocketManager.DisconnectSocket
+System3.Threading.ThreadManager.StartThread
+System3.Threading.ThreadManager.StopThread
+System3.Threading.ThreadManager.PauseThread
+System3.Threading.ThreadManager.ResumeThread
+System3.Threading.TaskManager.ScheduleTask
+System3.Threading.TaskManager.CancelTask
+System3.Threading.MutexManager.CreateMutex
+System3.Threading.MutexManager.ReleaseMutex
+System3.Threading.SemaphoreManager.CreateSemaphore
+System3.Threading.SemaphoreManager.ReleaseSemaphore
+System3.Threading.EventWaitHandleManager.SetEvent
+System3.Threading.EventWaitHandleManager.ResetEvent
+System3.Security.Cryptography.EncryptionManager.EncryptData
+System3.Security.Cryptography.EncryptionManager.DecryptData
+System3.Security.Cryptography.HashManager.ComputeHash
+System3.Security.Cryptography.HashManager.VerifyHash
+System3.Collections.Generic.ListManager.AddItem
+System3.Collections.Generic.ListManager.RemoveItem
+System3.Collections.Generic.ListManager.FindItem
+System3.Collections.Generic.QueueManager.EnqueueItem
+System3.Collections.Generic.QueueManager.DequeueItem
+System3.Collections.Generic.StackManager.PushItem
+System3.Collections.Generic.StackManager.PopItem
+System3.Collections.Generic.DictionaryManager.AddEntry
+System3.Collections.Generic.DictionaryManager.RemoveEntry
+System3.Collections.Generic.DictionaryManager.FindEntry
+System3.Linq.QueryableManager.FilterData
+System3.Linq.QueryableManager.SortData
+System3.Linq.QueryableManager.GroupData
+System3.Linq.EnumerableManager.EnumerateItems
+System3.Linq.EnumerableManager.AggregateItems
+System3.Linq.EnumerableManager.ConcatenateItems
+System3.Xml.XmlParser.ParseDocument
+System3.Xml.XmlParser.ValidateDocument
+System3.Xml.XmlParser.TransformDocument
+System3.Text.StringBuilderManager.AppendString
+System3.Text.StringBuilderManager.InsertString
+System3.Text.StringBuilderManager.RemoveString
+System3.Text.RegularExpressions.RegexManager.MatchPattern
+System3.Text.RegularExpressions.RegexManager.ReplacePattern
+System3.Text.RegularExpressions.RegexManager.SplitPattern
+System3.Drawing.GraphicsManager.DrawImage
+System3.Drawing.GraphicsManager.DrawText
+System3.Drawing.GraphicsManager.DrawShape
+System3.Drawing.ColorManager.ConvertToRGB
+System3.Drawing.ColorManager.ConvertToHex
+System3.Drawing.ColorManager.BlendColors
+System3.Windows.Forms.FormManager.CreateForm
+System3.Windows.Forms.FormManager.CloseForm
+System3.Windows.Forms.FormManager.MaximizeForm
+System3.Windows.Forms.FormManager.MinimizeForm
+System3.Windows.Forms.ControlManager.AddControl
+System3.Windows.Forms.ControlManager.RemoveControl
+System3.Windows.Forms.ControlManager.EnableControl
+System3.Windows.Forms.ControlManager.DisableControl
+System3.Windows.Forms.MenuManager.CreateMenu
+System3.Windows.Forms.MenuManager.AddItem
+System3.Windows.Forms.MenuManager.RemoveItem
+System3.Windows.Forms.DialogManager.ShowDialog
+System3.Windows.Forms.DialogManager.CloseDialog
+System3.Windows.Forms.MessageBoxManager.ShowMessage
+System3.Windows.Forms.MessageBoxManager.CloseMessage
+System3.Data.SqlClient.SqlConnectionManager.OpenConnection
+System3.Data.SqlClient.SqlConnectionManager.CloseConnection
+System3.Data.SqlClient.SqlCommandManager.ExecuteCommand
+System3.Data.SqlClient.SqlCommandManager.CancelCommand
+System3.Data.SqlClient.SqlTransactionManager.BeginTransaction
+System3.Data.SqlClient.SqlTransactionManager.CommitTransaction
+System3.Data.SqlClient.SqlTransactionManager.RollbackTransaction
+System3.Data.SqlTypes.SqlTypeConverter.ConvertToInt
+System3.Data.SqlTypes.SqlTypeConverter.ConvertToString
+System3.Data.SqlTypes.SqlTypeConverter.ConvertToDateTime
+System3.Data.DataSetManager.CreateDataSet
+System3.Data.DataSetManager.AddDataTable
+System3.Data.DataSetManager.RemoveDataTable
+System3.Data.DataTableManager.AddRow
+System3.Data.DataTableManager.RemoveRow
+System3.Data.DataTableManager.UpdateRow
+System3.Data.DataRowManager.SetColumnValue
+System3.Data.DataRowManager.GetColumnValue
+System3.Data.DataColumnManager.AddColumn
+System3.Data.DataColumnManager.RemoveColumn
+System3.Data.DataRelationManager.AddRelation
+System3.Data.DataRelationManager.RemoveRelation
+System3.Data.DataViewManager.FilterView
+System3.Data.DataViewManager.SortView
+System3.Data.DataViewManager.GroupView
+System3.ServiceProcess.ServiceControllerManager.StartService
+System3.ServiceProcess.ServiceControllerManager.StopService
+System3.ServiceProcess.ServiceControllerManager.PauseService
+System3.ServiceProcess.ServiceControllerManager.ContinueService
+System3.Configuration.ConfigurationManager.ReadSetting
+System3.Configuration.ConfigurationManager.WriteSetting
+System3.Configuration.ConfigurationManager.DeleteSetting
+System3.Configuration.ConfigurationManager.LoadConfiguration
+System3.Configuration.ConfigurationManager.SaveConfiguration
+System3.Environment.EnvironmentManager.GetEnvironmentVariable
+System3.Environment.EnvironmentManager.SetEnvironmentVariable
+System3.Environment.EnvironmentManager.GetSystemInfo
+System3.Globalization.CultureInfoManager.SetCulture
+System3.Globalization.CultureInfoManager.GetCulture
+System3.Globalization.CultureInfoManager.FormatDate
+System3.Globalization.CultureInfoManager.FormatNumber
+System3.Globalization.CultureInfoManager.TranslateText
+System3.Diagnostics.ProcessManager.StartProcess
+System3.Diagnostics.ProcessManager.StopProcess
+System3.Diagnostics.ProcessManager.KillProcess
+System3.Diagnostics.ProcessManager.GetProcessInfo
+System3.Diagnostics.DebugManager.WriteLog
+System3.Diagnostics.DebugManager.LogError
+System3.Diagnostics.DebugManager.LogWarning
+System3.Diagnostics.DebugManager.WriteTrace
+System3.Diagnostics.TraceManager.StartTrace
+System3.Diagnostics.TraceManager.StopTrace
+System3.Diagnostics.TraceManager.TraceEvent
+System3.Diagnostics.TraceManager.TraceData
+System3.Runtime.Serialization.Formatter
+
+System4.IO.FileManager.OpenFile
+System4.IO.FileManager.CloseFile
+System4.IO.FileManager.DeleteFile
+System4.IO.DirectoryManager.CreateDirectory
+System4.IO.DirectoryManager.DeleteDirectory
+System4.Net.HttpClient.SendRequest
+System4.Net.HttpClient.ReceiveResponse
+System4.Net.SocketManager.ConnectSocket
+System4.Net.SocketManager.DisconnectSocket
+System4.Threading.ThreadManager.StartThread
+System4.Threading.ThreadManager.StopThread
+System4.Threading.ThreadManager.PauseThread
+System4.Threading.ThreadManager.ResumeThread
+System4.Threading.TaskManager.ScheduleTask
+System4.Threading.TaskManager.CancelTask
+System4.Threading.MutexManager.CreateMutex
+System4.Threading.MutexManager.ReleaseMutex
+System4.Threading.SemaphoreManager.CreateSemaphore
+System4.Threading.SemaphoreManager.ReleaseSemaphore
+System4.Threading.EventWaitHandleManager.SetEvent
+System4.Threading.EventWaitHandleManager.ResetEvent
+System4.Security.Cryptography.EncryptionManager.EncryptData
+System4.Security.Cryptography.EncryptionManager.DecryptData
+System4.Security.Cryptography.HashManager.ComputeHash
+System4.Security.Cryptography.HashManager.VerifyHash
+System4.Collections.Generic.ListManager.AddItem
+System4.Collections.Generic.ListManager.RemoveItem
+System4.Collections.Generic.ListManager.FindItem
+System4.Collections.Generic.QueueManager.EnqueueItem
+System4.Collections.Generic.QueueManager.DequeueItem
+System4.Collections.Generic.StackManager.PushItem
+System4.Collections.Generic.StackManager.PopItem
+System4.Collections.Generic.DictionaryManager.AddEntry
+System4.Collections.Generic.DictionaryManager.RemoveEntry
+System4.Collections.Generic.DictionaryManager.FindEntry
+System4.Linq.QueryableManager.FilterData
+System4.Linq.QueryableManager.SortData
+System4.Linq.QueryableManager.GroupData
+System4.Linq.EnumerableManager.EnumerateItems
+System4.Linq.EnumerableManager.AggregateItems
+System4.Linq.EnumerableManager.ConcatenateItems
+System4.Xml.XmlParser.ParseDocument
+System4.Xml.XmlParser.ValidateDocument
+System4.Xml.XmlParser.TransformDocument
+System4.Text.StringBuilderManager.AppendString
+System4.Text.StringBuilderManager.InsertString
+System4.Text.StringBuilderManager.RemoveString
+System4.Text.RegularExpressions.RegexManager.MatchPattern
+System4.Text.RegularExpressions.RegexManager.ReplacePattern
+System4.Text.RegularExpressions.RegexManager.SplitPattern
+System4.Drawing.GraphicsManager.DrawImage
+System4.Drawing.GraphicsManager.DrawText
+System4.Drawing.GraphicsManager.DrawShape
+System4.Drawing.ColorManager.ConvertToRGB
+System4.Drawing.ColorManager.ConvertToHex
+System4.Drawing.ColorManager.BlendColors
+System4.Windows.Forms.FormManager.CreateForm
+System4.Windows.Forms.FormManager.CloseForm
+System4.Windows.Forms.FormManager.MaximizeForm
+System4.Windows.Forms.FormManager.MinimizeForm
+System4.Windows.Forms.ControlManager.AddControl
+System4.Windows.Forms.ControlManager.RemoveControl
+System4.Windows.Forms.ControlManager.EnableControl
+System4.Windows.Forms.ControlManager.DisableControl
+System4.Windows.Forms.MenuManager.CreateMenu
+System4.Windows.Forms.MenuManager.AddItem
+System4.Windows.Forms.MenuManager.RemoveItem
+System4.Windows.Forms.DialogManager.ShowDialog
+System4.Windows.Forms.DialogManager.CloseDialog
+System4.Windows.Forms.MessageBoxManager.ShowMessage
+System4.Windows.Forms.MessageBoxManager.CloseMessage
+System4.Data.SqlClient.SqlConnectionManager.OpenConnection
+System4.Data.SqlClient.SqlConnectionManager.CloseConnection
+System4.Data.SqlClient.SqlCommandManager.ExecuteCommand
+System4.Data.SqlClient.SqlCommandManager.CancelCommand
+System4.Data.SqlClient.SqlTransactionManager.BeginTransaction
+System4.Data.SqlClient.SqlTransactionManager.CommitTransaction
+System4.Data.SqlClient.SqlTransactionManager.RollbackTransaction
+System4.Data.SqlTypes.SqlTypeConverter.ConvertToInt
+System4.Data.SqlTypes.SqlTypeConverter.ConvertToString
+System4.Data.SqlTypes.SqlTypeConverter.ConvertToDateTime
+System4.Data.DataSetManager.CreateDataSet
+System4.Data.DataSetManager.AddDataTable
+System4.Data.DataSetManager.RemoveDataTable
+System4.Data.DataTableManager.AddRow
+System4.Data.DataTableManager.RemoveRow
+System4.Data.DataTableManager.UpdateRow
+System4.Data.DataRowManager.SetColumnValue
+System4.Data.DataRowManager.GetColumnValue
+System4.Data.DataColumnManager.AddColumn
+System4.Data.DataColumnManager.RemoveColumn
+System4.Data.DataRelationManager.AddRelation
+System4.Data.DataRelationManager.RemoveRelation
+System4.Data.DataViewManager.FilterView
+System4.Data.DataViewManager.SortView
+System4.Data.DataViewManager.GroupView
+System4.ServiceProcess.ServiceControllerManager.StartService
+System4.ServiceProcess.ServiceControllerManager.StopService
+System4.ServiceProcess.ServiceControllerManager.PauseService
+System4.ServiceProcess.ServiceControllerManager.ContinueService
+System4.Configuration.ConfigurationManager.ReadSetting
+System4.Configuration.ConfigurationManager.WriteSetting
+System4.Configuration.ConfigurationManager.DeleteSetting
+System4.Configuration.ConfigurationManager.LoadConfiguration
+System4.Configuration.ConfigurationManager.SaveConfiguration
+System4.Environment.EnvironmentManager.GetEnvironmentVariable
+System4.Environment.EnvironmentManager.SetEnvironmentVariable
+System4.Environment.EnvironmentManager.GetSystemInfo
+System4.Globalization.CultureInfoManager.SetCulture
+System4.Globalization.CultureInfoManager.GetCulture
+System4.Globalization.CultureInfoManager.FormatDate
+System4.Globalization.CultureInfoManager.FormatNumber
+System4.Globalization.CultureInfoManager.TranslateText
+System4.Diagnostics.ProcessManager.StartProcess
+System4.Diagnostics.ProcessManager.StopProcess
+System4.Diagnostics.ProcessManager.KillProcess
+System4.Diagnostics.ProcessManager.GetProcessInfo
+System4.Diagnostics.DebugManager.WriteLog
+System4.Diagnostics.DebugManager.LogError
+System4.Diagnostics.DebugManager.LogWarning
+System4.Diagnostics.DebugManager.WriteTrace
+System4.Diagnostics.TraceManager.StartTrace
+System4.Diagnostics.TraceManager.StopTrace
+System4.Diagnostics.TraceManager.TraceEvent
+System4.Diagnostics.TraceManager.TraceData
+System4.Runtime.Serialization.Formatter
+
+System2.IO.FileManager.OpenFile
+System2.IO.FileManager.CloseFile
+System2.IO.FileManager.DeleteFile
+System2.IO.DirectoryManager.CreateDirectory
+System2.IO.DirectoryManager.DeleteDirectory
+System2.Net.HttpClient.SendRequest
+System2.Net.HttpClient.ReceiveResponse
+System2.Net.SocketManager.ConnectSocket
+System2.Net.SocketManager.DisconnectSocket
+System2.Threading.ThreadManager.StartThread
+System2.Threading.ThreadManager.StopThread
+System2.Threading.ThreadManager.PauseThread
+System2.Threading.ThreadManager.ResumeThread
+System2.Threading.TaskManager.ScheduleTask
+System2.Threading.TaskManager.CancelTask
+System2.Threading.MutexManager.CreateMutex
+System2.Threading.MutexManager.ReleaseMutex
+System2.Threading.SemaphoreManager.CreateSemaphore
+System2.Threading.SemaphoreManager.ReleaseSemaphore
+System2.Threading.EventWaitHandleManager.SetEvent
+System2.Threading.EventWaitHandleManager.ResetEvent
+System2.Security.Cryptography.EncryptionManager.EncryptData
+System2.Security.Cryptography.EncryptionManager.DecryptData
+System2.Security.Cryptography.HashManager.ComputeHash
+System2.Security.Cryptography.HashManager.VerifyHash
+System2.Collections.Generic.ListManager.AddItem
+System2.Collections.Generic.ListManager.RemoveItem
+System2.Collections.Generic.ListManager.FindItem
+System2.Collections.Generic.QueueManager.EnqueueItem
+System2.Collections.Generic.QueueManager.DequeueItem
+System2.Collections.Generic.StackManager.PushItem
+System2.Collections.Generic.StackManager.PopItem
+System2.Collections.Generic.DictionaryManager.AddEntry
+System2.Collections.Generic.DictionaryManager.RemoveEntry
+System2.Collections.Generic.DictionaryManager.FindEntry
+System2.Linq.QueryableManager.FilterData
+System2.Linq.QueryableManager.SortData
+System2.Linq.QueryableManager.GroupData
+System2.Linq.EnumerableManager.EnumerateItems
+System2.Linq.EnumerableManager.AggregateItems
+System2.Linq.EnumerableManager.ConcatenateItems
+System2.Xml.XmlParser.ParseDocument
+System2.Xml.XmlParser.ValidateDocument
+System2.Xml.XmlParser.TransformDocument
+System2.Text.StringBuilderManager.AppendString
+System2.Text.StringBuilderManager.InsertString
+System2.Text.StringBuilderManager.RemoveString
+System2.Text.RegularExpressions.RegexManager.MatchPattern
+System2.Text.RegularExpressions.RegexManager.ReplacePattern
+System2.Text.RegularExpressions.RegexManager.SplitPattern
+System2.Drawing.GraphicsManager.DrawImage
+System2.Drawing.GraphicsManager.DrawText
+System2.Drawing.GraphicsManager.DrawShape
+System2.Drawing.ColorManager.ConvertToRGB
+System2.Drawing.ColorManager.ConvertToHex
+System2.Drawing.ColorManager.BlendColors
+System2.Windows.Forms.FormManager.CreateForm
+System2.Windows.Forms.FormManager.CloseForm
+System2.Windows.Forms.FormManager.MaximizeForm
+System2.Windows.Forms.FormManager.MinimizeForm
+System2.Windows.Forms.ControlManager.AddControl
+System2.Windows.Forms.ControlManager.RemoveControl
+System2.Windows.Forms.ControlManager.EnableControl
+System2.Windows.Forms.ControlManager.DisableControl
+System2.Windows.Forms.MenuManager.CreateMenu
+System2.Windows.Forms.MenuManager.AddItem
+System2.Windows.Forms.MenuManager.RemoveItem
+System2.Windows.Forms.DialogManager.ShowDialog
+System2.Windows.Forms.DialogManager.CloseDialog
+System2.Windows.Forms.MessageBoxManager.ShowMessage
+System2.Windows.Forms.MessageBoxManager.CloseMessage
+System2.Data.SqlClient.SqlConnectionManager.OpenConnection
+System2.Data.SqlClient.SqlConnectionManager.CloseConnection
+System2.Data.SqlClient.SqlCommandManager.ExecuteCommand
+System2.Data.SqlClient.SqlCommandManager.CancelCommand
+System2.Data.SqlClient.SqlTransactionManager.BeginTransaction
+System2.Data.SqlClient.SqlTransactionManager.CommitTransaction
+System2.Data.SqlClient.SqlTransactionManager.RollbackTransaction
+System2.Data.SqlTypes.SqlTypeConverter.ConvertToInt
+System2.Data.SqlTypes.SqlTypeConverter.ConvertToString
+System2.Data.SqlTypes.SqlTypeConverter.ConvertToDateTime
+System2.Data.DataSetManager.CreateDataSet
+System2.Data.DataSetManager.AddDataTable
+System2.Data.DataSetManager.RemoveDataTable
+System2.Data.DataTableManager.AddRow
+System2.Data.DataTableManager.RemoveRow
+System2.Data.DataTableManager.UpdateRow
+System2.Data.DataRowManager.SetColumnValue
+System2.Data.DataRowManager.GetColumnValue
+System2.Data.DataColumnManager.AddColumn
+System2.Data.DataColumnManager.RemoveColumn
+System2.Data.DataRelationManager.AddRelation
+System2.Data.DataRelationManager.RemoveRelation
+System2.Data.DataViewManager.FilterView
+System2.Data.DataViewManager.SortView
+System2.Data.DataViewManager.GroupView
+System2.ServiceProcess.ServiceControllerManager.StartService
+System2.ServiceProcess.ServiceControllerManager.StopService
+System2.ServiceProcess.ServiceControllerManager.PauseService
+System2.ServiceProcess.ServiceControllerManager.ContinueService
+System2.Configuration.ConfigurationManager.ReadSetting
+System2.Configuration.ConfigurationManager.WriteSetting
+System2.Configuration.ConfigurationManager.DeleteSetting
+System2.Configuration.ConfigurationManager.LoadConfiguration
+System2.Configuration.ConfigurationManager.SaveConfiguration
+System2.Environment.EnvironmentManager.GetEnvironmentVariable
+System2.Environment.EnvironmentManager.SetEnvironmentVariable
+System2.Environment.EnvironmentManager.GetSystemInfo
+System2.Globalization.CultureInfoManager.SetCulture
+System2.Globalization.CultureInfoManager.GetCulture
+System2.Globalization.CultureInfoManager.FormatDate
+System2.Globalization.CultureInfoManager.FormatNumber
+System2.Globalization.CultureInfoManager.TranslateText
+System2.Diagnostics.ProcessManager.StartProcess
+System2.Diagnostics.ProcessManager.StopProcess
+System2.Diagnostics.ProcessManager.KillProcess
+System2.Diagnostics.ProcessManager.GetProcessInfo
+System2.Diagnostics.DebugManager.WriteLog
+System2.Diagnostics.DebugManager.LogError
+System2.Diagnostics.DebugManager.LogWarning
+System2.Diagnostics.DebugManager.WriteTrace
+System2.Diagnostics.TraceManager.StartTrace
+System2.Diagnostics.TraceManager.StopTrace
+System2.Diagnostics.TraceManager.TraceEvent
+System2.Diagnostics.TraceManager.TraceData
+System2.Runtime.Serialization.Formatter
+
+                System.Console.WriteLine
+            ";
+            var manager = new APIAllowlist(allowlist);
+
+            Assert.IsTrue(manager.IsMethodAllowlisted("System.Console.WriteLine"));
+            Assert.IsFalse(manager.IsMethodAllowlisted("System.Console.ReadLine"));
+        }
+
+        [Test]
+        public void TestAsteriskPattern()
+        {
+            string allowlist = @"
+            System.Console.Wri*
+            System.Console.*";
+            var manager = new APIAllowlist(allowlist);
+
+            Assert.IsTrue(manager.IsMethodAllowlisted("System.Console.WriteLine"));
+        }
+
+        [Test]
+        public void TestCatchall()
+        {
+            string allowlist = @"*";
+            var manager = new APIAllowlist(allowlist);
+
+            Assert.IsTrue(manager.IsMethodAllowlisted("System.Console.WriteLine"));
+        }
+
+        [Test]
+        public void TestEmpty()
+        {
+            string allowlist = @"";
+            var manager = new APIAllowlist(allowlist);
+
+            Assert.IsFalse(manager.IsMethodAllowlisted("System.Console.WriteLine"));
+        }
+
+        [Test]
+        public void TestDoubleAsteriskThrowsError()
+        {
+            string allowlist = "System.**";
+
+            Assert.Throws<ArgumentException>(() => new APIAllowlist(allowlist));
+        }
+    }
+}
