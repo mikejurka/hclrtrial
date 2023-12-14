@@ -10,6 +10,12 @@ namespace SpatialSys.Client.CSharpScripting
     /// It loads a configuration file named 'csharp_api_allowlist.txt' from Unity's Resources folder.
     public class APIRestrictionsMainAssembly
     {
+
+        public static bool HelloWorld()
+        {
+            Debug.Log("Hello, world!");
+            return true;
+        }
         public static bool IsMethodAllowlisted(string methodFullName)
         {
             return APIRestrictionsMainAssembly.Instance._allowlist.IsMethodAllowlisted(methodFullName);

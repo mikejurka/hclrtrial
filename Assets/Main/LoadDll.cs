@@ -14,6 +14,7 @@ public class LoadDll : MonoBehaviour
 
     void Start()
     {
+        Debug.Log(SpatialSys.Client.CSharpScripting.APIRestrictionsMainAssembly.HelloWorld());
         Debug.Log("XXXX APIRestrictionsMainAssembly.IsMethodAllowlisted " + SpatialSys.Client.CSharpScripting.APIRestrictionsMainAssembly.IsMethodAllowlisted("c"));
         Debug.Log("XXXX APIRestrictionsMainAssembly.IsMethodAllowlisted " + SpatialSys.Client.CSharpScripting.APIRestrictionsMainAssembly.IsMethodAllowlisted("UnityEngine.Application.Quit"));
         Debug.Log("XXXX APIRestrictions.IsMethodAllowlisted " + SpatialSys.Client.CSharpScripting.APIRestrictions.IsMethodAllowlisted("d"));
