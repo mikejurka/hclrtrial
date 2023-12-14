@@ -6,6 +6,10 @@
 #include "vm/Exception.h"
 #include "vm/String.h"
 #include "vm/Field.h"
+#include "vm/Image.h"
+#include "vm/Object.h"
+
+#include <iostream>
 
 #include "../interpreter/InterpreterUtil.h"
 
@@ -146,6 +150,67 @@ else \
 		}
 		return nullptr;
 	}
+
+	static const MethodInfo* FindMethod(std::string assemblyName, std::string namespaze, std::string clazzName, std::string methodName, int argsCount) {
+		const Il2CppAssembly* assembly = il2cpp::vm::Assembly::Load("Assembly-CSharp.dll");
+		if (assembly == nullptr)
+		{
+			return nullptr;
+		}
+		const Il2CppImage* image = il2cpp::vm::Assembly::GetImage(assembly);
+		if (image == nullptr)
+		{
+			return nullptr;
+		}
+		Il2CppClass* klazz = il2cpp::vm::Image::ClassFromName(image, namespaze.c_str(), clazzName.c_str());
+		if (klazz == nullptr)
+		{
+			return nullptr;
+		}
+		return il2cpp::vm::Class::GetMethodFromName(klazz, methodName.c_str(), argsCount);
+	}
+
+	static void EnforceAPIAllowlist(const MethodInfo* method, std::string methodName, std::string tag)
+	{
+		Il2CppString* methodNameArgB = il2cpp::vm::String::New("b");
+
+		const MethodInfo* m0 = FindMethod("Assembly-CSharp.dll", "SpatialSys.Client.CSharpScripting", "APIRestrictionsMainAssembly", "HelloWorld", 0);
+		if (m0 == nullptr)
+		{
+			std::cout << "XXXX 0 Unable to find SpatialSys.Client.CSharpScripting.APIRestrictionsMainAssembly.HelloWorld (Assembly: Assembly-CSharp.dll)" << std::endl;
+		} else {
+			Il2CppObject *r0 = il2cpp::vm::Runtime::Invoke(m0, nullptr, nullptr, nullptr);
+			void* v0 = il2cpp::vm::Object::Unbox(r0);
+			std::cout << "XXXX 0 return val of HelloWorld is " << *((int32_t*)v0) << std::endl;
+		}
+
+		const MethodInfo* m1 = FindMethod("Assembly-CSharp.dll", "SpatialSys.Client.CSharpScripting", "APIRestrictionsMainAssembly", "IsMethodAllowlisted", 1);
+		if (m1 == nullptr)
+		{
+			std::cout << "XXXX 1 Unable to find SpatialSys.Client.CSharpScripting.APIRestrictionsMainAssembly.IsMethodAllowlisted (Assembly: Assembly-CSharp.dll)" << std::endl;
+		} else {
+			Il2CppString* methodNameArgB = il2cpp::vm::String::New("b");
+			void* args[1];
+			args[0] = methodNameArgB;
+			Il2CppObject *r1 = il2cpp::vm::Runtime::Invoke(m1, nullptr, (void**)args, nullptr);
+			void* v1 = il2cpp::vm::Object::Unbox(r1);
+			std::cout << "XXXX 1 return val of APIRestrictionsMainAssembly.IsMethodAllowlisted is " << *((int32_t*)v1) << std::endl;
+		}
+
+		const MethodInfo* m2 = FindMethod("SpatialSys.Client.dll", "SpatialSys.Client.CSharpScripting", "APIRestrictions", "IsMethodAllowlisted", 1);
+		if (m2 == nullptr)
+		{
+			std::cout << "XXXX 2 Unable to find SpatialSys.Client.CSharpScripting.APIRestrictions.IsMethodAllowlisted (Assembly: SpatialSys.Client.dll)" << std::endl;
+		} else {
+			Il2CppString* methodNameArgB = il2cpp::vm::String::New("b");
+			void* args[1];
+			args[0] = methodNameArgB;
+			Il2CppObject *r2 = il2cpp::vm::Runtime::Invoke(m2, nullptr, (void**)args, nullptr);
+			void* v2 = il2cpp::vm::Object::Unbox(r2);
+			std::cout << "XXXX 2 return val of APIRestrictionsMainAssembly.IsMethodAllowlisted is " << *((int32_t*)v2) << std::endl;
+		}
+	}
+
 	
 	void HiTransform::Transform(metadata::Image* image, const MethodInfo* methodInfo, metadata::MethodBody& body, interpreter::InterpMethodInfo& result)
 	{
@@ -685,6 +750,7 @@ else \
 				ip += 5;
 				shareMethod = const_cast<MethodInfo*>(image->GetMethodInfoFromToken(token, klassContainer, methodContainer, genericContext));
 				IL2CPP_ASSERT(shareMethod);
+				EnforceAPIAllowlist(shareMethod, "TODO", "OpcodeValue::CALL");
 			}
 
 		LabelCall:
